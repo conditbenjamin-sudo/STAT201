@@ -6,24 +6,39 @@ date: "2026-05-14"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(patchwork)
+library(lubridate)
+install.packages("writexl")
+library(writexl)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+Added Files
+```{r}
+library(readxl)
+Snowfall <- read_csv("Snowfall.csv")
+BirchBrookDischarge <- read_excel("BirchBrookDischarge.xlsx")
+BirchBrookTemp <- read_excel("BirchBrookTemp.xlsx")
+Precipitation <- read_excel("Precipitation.xlsx")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+halfDays <- Snowfall %>% group_by(Season) %>% filter(!is.na(`Snowfall (in)`)) %>% mutate(seasonTot = sum(`Snowfall (in)`,na.rm = T))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+BirchBrookDischarge <- BirchBrookDischarge %>% mutate(Date = as.Date(Date)) %>% filter(month(Date) >= 5 & month(Date) <= 10)
+BirchBrookTemp <- BirchBrookTemp %>% mutate(`South Branch Birch Brook Temperature Record` = as.Date(`South Branch Birch Brook Temperature Record`)) %>% filter(month(`South Branch Birch Brook Temperature Record`) >= 5 & month(`South Branch Birch Brook Temperature Record`) <= 10)
+
+monthDis <- BirchBrookDischarge %>% mutate(Month = floor_date(Date, "month")) %>% group_by(Month) %>% summarize(`South Branch Birch Brook daily AVG discharge ft3s-1` = mean(`South Branch Birch Brook daily AVG discharge ft3s-1`, na.rm = TRUE))
+
+monthTemp <- BirchBrookTemp %>% mutate(Month = floor_date(`South Branch Birch Brook Temperature Record`, "month")) %>% group_by(Month) %>% summarize(`Avg Temp South Branch (ºC)` = mean(`Avg Temp South Branch (ºC)`, na.rm = TRUE))
+```
+
+
+```{r}
+write_xlsx(monthDis, "monthDis.xlsx")
+write_xlsx(monthTemp, "monthTemp.xlsx")
+```
+
