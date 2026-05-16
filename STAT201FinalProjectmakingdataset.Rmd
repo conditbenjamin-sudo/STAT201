@@ -1,0 +1,44 @@
+---
+title: "STAT201Final"
+output: html_document
+date: "2026-05-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(patchwork)
+library(lubridate)
+install.packages("writexl")
+library(writexl)
+```
+
+
+Added Files
+```{r}
+library(readxl)
+Snowfall <- read_csv("Snowfall.csv")
+BirchBrookDischarge <- read_excel("BirchBrookDischarge.xlsx")
+BirchBrookTemp <- read_excel("BirchBrookTemp.xlsx")
+Precipitation <- read_excel("Precipitation.xlsx")
+```
+
+```{r}
+halfDays <- Snowfall %>% group_by(Season) %>% filter(!is.na(`Snowfall (in)`)) %>% mutate(seasonTot = sum(`Snowfall (in)`,na.rm = T))
+```
+
+```{r}
+BirchBrookDischarge <- BirchBrookDischarge %>% mutate(Date = as.Date(Date)) %>% filter(month(Date) >= 5 & month(Date) <= 10)
+BirchBrookTemp <- BirchBrookTemp %>% mutate(`South Branch Birch Brook Temperature Record` = as.Date(`South Branch Birch Brook Temperature Record`)) %>% filter(month(`South Branch Birch Brook Temperature Record`) >= 5 & month(`South Branch Birch Brook Temperature Record`) <= 10)
+
+monthDis <- BirchBrookDischarge %>% mutate(Month = floor_date(Date, "month")) %>% group_by(Month) %>% summarize(`South Branch Birch Brook daily AVG discharge ft3s-1` = mean(`South Branch Birch Brook daily AVG discharge ft3s-1`, na.rm = TRUE))
+
+monthTemp <- BirchBrookTemp %>% mutate(Month = floor_date(`South Branch Birch Brook Temperature Record`, "month")) %>% group_by(Month) %>% summarize(`Avg Temp South Branch (ºC)` = mean(`Avg Temp South Branch (ºC)`, na.rm = TRUE))
+```
+
+
+```{r}
+write_xlsx(monthDis, "monthDis.xlsx")
+write_xlsx(monthTemp, "monthTemp.xlsx")
+```
+

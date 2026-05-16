@@ -1,0 +1,49 @@
+---
+title: "DataAnalysis"
+output: pdf_document
+date: "2026-05-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+setwd("/cloud/project")
+```
+
+```{r}
+combineddata<-read.csv("CData.csv")
+
+##Add date column by combining year and month
+combineddata <- combineddata %>%
+  mutate(date_col = make_date(Year, Month, 1))
+
+## Initial Plots
+# Snowfall by Year
+combineddata %>%
+  filter(Month == 10) %>%
+  ggplot(aes(x = date_col, y = TotalSnow)) + geom_point() + geom_line() + labs(title = "Total Snowfall by Year", x = "Year", y = "Total Snowfall (in)") + theme(plot.title = element_text(hjust = 0.5))
+
+# Rainfall by Month
+ggplot(data = combineddata, aes(x = date_col, y = TotalRain)) + geom_point() + geom_line() + labs(title = "Rainfall by Month", x = "Date", y = "Total Rainfall (in)") + theme(plot.title = element_text(hjust = 0.5))
+
+# Birch Brook Temperature by Month
+ggplot(data = combineddata, aes(x = date_col, y = BBAvgTemp)) + geom_point() + geom_line() + labs(title = "Birch Brook Temperature by Month", x = "Date", y = "Temperature (°C)") + theme(plot.title = element_text(hjust = 0.5))
+
+# Birch Brook Discharge by Month
+ggplot(data = combineddata, aes(x = date_col, y = BBAvgDischarge)) + geom_point() + geom_line() + labs(title = "Birch Brook Discharge by Month", x = "Date", y = "Discharge (ft^3/s)") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+```{r}
+moddis<-lm(formula=BBAvgDischarge~TotalSnow + TotalRain + FrontHeavy + BBAvgTemp, data=combineddata)
+summary(moddis)
+
+modtemp<-lm(formula=BBAvgTemp~TotalSnow + TotalRain + FrontHeavy +BBAvgDischarge, data=combineddata)
+summary(modtemp)
+
+ggplot(data=combineddata, aes(x=BBavgDischarge, y=TotalSnow))+geom_point()+geom_smooth(method="lm")
+
+aov(~, data=combineddata)
+```
+
+
