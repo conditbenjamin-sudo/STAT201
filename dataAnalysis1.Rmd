@@ -22,7 +22,7 @@ combineddata <- combineddata %>%
 combineddata %>%
   filter(Month == 10) %>%
   ggplot(aes(x = date_col, y = TotalSnow)) + geom_point() + geom_line() + labs(title = "Total Snowfall by Year", x = "Year", y = "Total Snowfall (in)") + theme(plot.title = element_text(hjust = 0.5))
-
+ 
 # Rainfall by Month
 ggplot(data = combineddata, aes(x = date_col, y = TotalRain)) + geom_point() + geom_line() + labs(title = "Rainfall by Month", x = "Date", y = "Total Rainfall (in)") + theme(plot.title = element_text(hjust = 0.5))
 
@@ -36,14 +36,17 @@ ggplot(data = combineddata, aes(x = date_col, y = BBAvgDischarge)) + geom_point(
 
 ```{r}
 ## multiple linear regression for Discharge
-moddis<-lm(formula=BBAvgDischarge~TotalSnow + TotalRain + FrontHeavy + BBAvgTemp, data=combineddata)
+moddis<-lm(formula=BBAvgDischarge~TotalSnow + TotalRain + FrontHeavy + Month + MaxSnowDay + BBAvgTemp, data=combineddata)
 summary(moddis)
 
 ##multiple linear regression for Temp
-modtemp<-lm(formula=BBAvgTemp~TotalSnow + TotalRain + FrontHeavy + BBAvgDischarge, data=combineddata)
+modtemp<-lm(formula=BBAvgTemp~TotalSnow + TotalRain + FrontHeavy + Month + MaxSnowDay + BBAvgDischarge, data=combineddata)
 summary(modtemp)
 
-ggplot(data=combineddata, aes(x=TotalSnow, y=BBAvgDischarge + BBAvgTemp))+geom_point()+geom_smooth(method="lm")
+ggplot(data=combineddata, aes(x=TotalSnow, y=BBAvgDischarge))+geom_point()+geom_smooth(method="lm")
+ggplot(data=combineddata, aes(x=TotalSnow, y=BBAvgTemp))+geom_point()+geom_smooth(method="lm")
+ggplot(data=combineddata, aes(x=TotalRain, y=BBAvgDischarge))+geom_point()+geom_smooth(method="lm")
+ggplot(data=combineddata, aes(x=TotalRain, y=BBAvgTemp))+geom_point()+geom_smooth(method="lm")
 
 ## Anova Test for Discharge
 anova <- aov(BBAvgDischarge ~ TotalSnow + BBAvgTemp + TotalRain + FrontHeavy, data = combineddata)
@@ -52,7 +55,7 @@ summary(anova)
 anova <- aov(BBAvgTemp ~ TotalSnow + BBAvgDischarge + TotalRain + FrontHeavy, data = combineddata)
 summary(anova)
 
-
+## Create month-based datasets
 monthData <- combineddata %>% group_split(Month)
 mayData <- monthData[[1]]
 juneData <- monthData[[2]]
@@ -61,6 +64,7 @@ augustData <- monthData[[4]]
 septemberData <- monthData[[5]]
 octoberData <- monthData[[6]]
 
+## Multiple Regression on the datasets for each month 
 mayTemp <- lm(formula=BBAvgTemp~TotalSnow + MaxSnowDay + FrontHeavy+ TotalRain, data=mayData)
 juneTemp <- lm(formula=BBAvgTemp~TotalSnow + MaxSnowDay + FrontHeavy+ TotalRain, data=juneData)
 julyTemp <- lm(formula=BBAvgTemp~TotalSnow + MaxSnowDay + FrontHeavy+ TotalRain, data=julyData)
@@ -75,6 +79,7 @@ augustDis <- lm(formula=BBAvgDischarge~TotalSnow + MaxSnowDay + FrontHeavy+ Tota
 septemberDis <- lm(formula=BBAvgDischarge~TotalSnow + MaxSnowDay + FrontHeavy+ TotalRain, data=septemberData)
 octoberDis <- lm(formula=BBAvgDischarge~TotalSnow + MaxSnowDay + FrontHeavy+ TotalRain, data=octoberData)
 
+## Output summary of regression models
 summary(mayDis)
 summary(juneDis)
 summary(julyDis)
