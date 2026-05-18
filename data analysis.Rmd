@@ -41,9 +41,33 @@ summary(moddis)
 modtemp<-lm(formula=BBAvgTemp~TotalSnow + TotalRain + FrontHeavy +BBAvgDischarge, data=combineddata)
 summary(modtemp)
 
-ggplot(data=combineddata, aes(x=BBavgDischarge, y=TotalSnow))+geom_point()+geom_smooth(method="lm")
+ggplot(data = combineddata, aes(x = BBAvgDischarge))+geom_point()+geom_smooth(method=lm)
 
 aov(~, data=combineddata)
+```
+
+```{r}
+library(ggplot2)
+
+# Plot 1: Month on x, discharge on y, colored by FrontHeavy, 
+# regression line = TotalSnow predicting BBAvgDischarge
+
+ggplot(combineddata, aes(x = date_col, y = BBAvgDischarge)) +
+  geom_point(aes(color = FrontHeavy), size = 3, alpha = 0.8) +
+  geom_smooth(aes(y = predict(lm(BBAvgDischarge ~ TotalSnow, data = combineddata))),
+              method = "lm", se = TRUE, color = "black", linewidth = 1) +
+  scale_color_gradient2(
+    low = "steelblue", mid = "white", high = "firebrick",
+    midpoint = 0, name = "Front Heavy\n(days)"
+  ) +
+  scale_x_continuous(breaks = 5:10,
+                     labels = c("May","Jun","Jul","Aug","Sep","Oct")) +
+  labs(
+    title = "Monthly Average Discharge with Seasonal Snowfall Trend",
+    subtitle = "Line shows how total seasonal snowfall predicts discharge",
+    x = "Month", y = "Average Discharge (m³/s)"
+  ) +
+  theme_minimal(base_size = 13)
 ```
 
 

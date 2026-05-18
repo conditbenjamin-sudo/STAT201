@@ -35,16 +35,23 @@ ggplot(data = combineddata, aes(x = date_col, y = BBAvgDischarge)) + geom_point(
 ```
 
 ```{r}
-moddis<-lm(formula=BBAvgDischarge~TotalSnow + TotalRain + FrontHeavy, data=combineddata)
+## multiple linear regression for Discharge
+moddis<-lm(formula=BBAvgDischarge~TotalSnow + TotalRain + FrontHeavy + BBAvgTemp, data=combineddata)
 summary(moddis)
 
-modtemp<-lm(formula=BBAvgTemp~TotalSnow + TotalRain + FrontHeavy, data=combineddata)
+##multiple linear regression for Temp
+modtemp<-lm(formula=BBAvgTemp~TotalSnow + TotalRain + FrontHeavy + BBAvgDischarge, data=combineddata)
 summary(modtemp)
 
 ggplot(data=combineddata, aes(x=TotalSnow, y=BBAvgDischarge + BBAvgTemp))+geom_point()+geom_smooth(method="lm")
 
-##aov(,data=combineddata)
-##combineddata %>% group_by(Month) %>% lm(formula=BBAvgTemp~TotalSnow + TotalRain + FrontHeavy, data=combineddata)
+## Anova Test for Discharge
+anova <- aov(BBAvgDischarge ~ TotalSnow + BBAvgTemp + TotalRain + FrontHeavy, data = combineddata)
+summary(anova)
+## Anova Test for Temp
+anova <- aov(BBAvgTemp ~ TotalSnow + BBAvgDischarge + TotalRain + FrontHeavy, data = combineddata)
+summary(anova)
+
 
 monthData <- combineddata %>% group_split(Month)
 mayData <- monthData[[1]]
